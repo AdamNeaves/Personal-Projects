@@ -1,11 +1,13 @@
 #lets try to make a maze game
 import sys
+import MazeGen
 #below lies array of cells with wall info in 'binary'
 #the wall info is a series of boolean values represented as a single int. 
 #Each number represents a side and whether or not that side has a wall
 #its in order NESW, so a 1010 means there is a wall to the north and south
-CellDict = {'1':'1101', '2':'1001','3':'1010','4':'1010','5':'1100','6':'0011','7':'0100','8':'1011','9':'1100','10':'0101','11':'1101','12':'0001','13':'1100','14':'0101','15':'0101','16':'0011','17':'0100','18':'0101','19':'0101','20':'0101','21':'1011','22':'0110','23':'0111','24':'0011','25':'0110'}
-#grid layout:
+		#CellDict = {'1':'1101', '2':'1001','3':'1010','4':'1010','5':'1100','6':'0011','7':'0100','8':'1011','9':'1100','10':'0101','11':'1101','12':'0001','13':'1100','14':'0101','15':'0101','16':'0011','17':'0100','18':'0101','19':'0101','20':'0101','21':'1011','22':'0110','23':'0111','24':'0011','25':'0110'}
+
+#grid layout: #only for 5x5 mazes, so not the best example now that randomization has been introduced
 ################
 #01,02,03,04,05#
 #06,07,08,09,10#
@@ -13,8 +15,11 @@ CellDict = {'1':'1101', '2':'1001','3':'1010','4':'1010','5':'1100','6':'0011','
 #16,17,18,19,20#
 #21,22,23,24,25#
 ################
-PlayerPos = 3
+PlayerPos = 1			#player starts in top left corner, always
 PlayerStepCount = 0
+PlayerGoal = MazeGen.wallLength*MazeGen.wallLength	#players exit, and therefore goal, is always the bottom right corner
+
+	
 def tellWall(CellPos):
 	#print("		Start tellWall function")#bug fixing
 	if CellPos in CellDict: #sanity check, make sure still in cell grid
@@ -66,7 +71,7 @@ def goNewCell(goDirect):
 				print(WallText)
 			else:
 				print('\n Gone North one square')
-				PlayerPos -=5 #move player down one cell in grid
+				PlayerPos -= wallLength #move player down one cell in grid
 				playerMoved = True
 		elif goDirect == 1:
 			#east
@@ -82,7 +87,7 @@ def goNewCell(goDirect):
 				print(WallText)
 			else:
 				print('\n Gone South one square')
-				PlayerPos +=5
+				PlayerPos += wallLength
 				playerMoved = True
 		elif goDirect == 3:
 			#west
@@ -131,7 +136,7 @@ def PlayerCommand(Command):#a command to read what the player has typed
 	elif "info" in Command:
 		tellWall(str(PlayerPos)); #will repeat what walls are at location using the tellWall function called when the player moves
 	elif "close" in Command:
-		print("Bye Bye")
+		print("\n Bye Bye")
 		sys.exit()
 	#elif 'location' in Command:
 		#print(PlayerPos) #used during development for testing and bug finding
@@ -139,15 +144,24 @@ def PlayerCommand(Command):#a command to read what the player has typed
 		print("\n " + Command+" is not a recognised command.\n Please type 'help' if you want to know the possible commands")
 	return
 #start text below! This displays at the beginning of the game
+print('Creating Cells!')
+MazeGen.genLists()
+MazeGen.startGen()
+print('Generating Maze!')
+MazeGen.genMaze()
+print('Loading Map!')
+MazeGen.genCellDict()
+CellDict = MazeGen.cellDict
+wallLength = MazeGen.wallLength
 print("\n Welcome to the maze! You find yourself standing just inside\n the start of the maze, having come through the door directly\n north of you, which slammed shut as you entered. In order to\n escape, you'll need to navigate the maze to find the exit!")
 print("\n Navigate by typing the command 'Go ____' and the direction you\n wish to travel. Type help if you need help")
 tellWall(str(PlayerPos)); # displays wall info for the starter square
 while True: # while loop to allow player to keep playing until the end
 	PlayerCommand(sys.stdin.readline().strip().lower());
-	if PlayerPos == 23: #if player at exit
+	if PlayerPos == PlayerGoal: #if player at exit
 		break #exit the while loop
 		
 	
 print("\n Congratulations, you found the end!")
 print(" It took you " +str(PlayerStepCount)+" squares to find the exit")
-raw_input("Hit any key to exit")
+raw_input("Hit the Enter key to exit: ")
